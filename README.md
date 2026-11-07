@@ -82,4 +82,4 @@ Ownership overlaps across frontend and backend; coordinate shared changes in the
 
 ## Verification status
 
-Dependencies have not been installed. JavaScript syntax and package manifests were checked locally. Build and API runtime verification require dependency installation; API startup also requires MongoDB configuration.
+Dependencies are installed and recorded in package-lock.json. The frontend production build passed. The backend connected to local MongoDB and GET /api/health returned HTTP 200 with status ok. Dependency installation reported zero vulnerabilities after updating React Router. Local .env files were created from the examples and remain ignored by Git.
