@@ -1,6 +1,6 @@
 # Smart Fleet and Store Transportation Management System
 
-Team A6 MERN project foundation. This scaffold provides the folder structure, a React starter page, and an Express API foundation. Business features, authentication, authorization, database schemas, and real-time tracking are not implemented yet.
+Team A6 MERN project foundation. This project provides the MERN folder structure, three working frontend preview pages, and an Express API foundation. Frontend records are stored locally in the browser. Backend business APIs, authentication, authorization, database schemas, and real-time tracking are not implemented yet.
 
 ## Requirements and setup
 
@@ -83,3 +83,15 @@ Ownership overlaps across frontend and backend; coordinate shared changes in the
 ## Verification status
 
 Dependencies are installed and recorded in package-lock.json. The frontend production build passed. The backend connected to local MongoDB and GET /api/health returned HTTP 200 with status ok. Dependency installation reported zero vulnerabilities after updating React Router. Local .env files were created from the examples and remain ignored by Git.
+
+## Frontend pages
+
+- `/bookings/create`: Two-step delivery form with future-date and Sri Lankan mobile validation, dynamic item rows, positive integer quantities, duplicate item checks, estimated load, and local draft saving.
+- `/admin/vehicles`: Searchable and filterable vehicle directory, summary cards, Add/Edit dialogs, unique registration checks, positive payload validation, and confirmed deletion.
+- `/admin/items`: Searchable and filterable item catalog, Add/Edit dialogs, unique item names, unit weights, categories, and status. Items referenced by a local booking cannot be deleted; deactivate them instead.
+
+The UI follows the supplied teal/mint reference. Navigation and a compact shared header/footer are provided for preview and can be integrated with the team's shared layout later. The admin routes are not access controlled yet.
+
+`FleetContext` seeds sample vehicles/items once and stores changes under `fleetflow.demo.*` localStorage keys. Bookings are browser-only drafts, not transport requests. Data does not synchronize between browsers or team members. Clear these keys in browser developer tools to reset demo data. The item catalog feeds the booking item selectors. Slots and stores are examples until the schedule/store APIs are integrated.
+
+Frontend validation and local persistence were checked through the browser, including multi-item draft saving, duplicate rejection, vehicle creation/edit/search/deletion, item creation/edit/filter/deletion, and item persistence after reload. Production build passed.
