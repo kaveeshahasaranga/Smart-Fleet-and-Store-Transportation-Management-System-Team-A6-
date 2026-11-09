@@ -6,9 +6,10 @@ const initialItems = [
   { id: 'ITM-003', name: 'Fresh vegetables', category: 'Produce', unit: 'crate', weight: 15, status: 'Active' },
 ];
 const initialVehicles = [
-  { id: 'VEH-001', registration: 'WP LQ-4821', type: 'Truck', capacity: 3000, driver: 'Nimal Perera', status: 'Available' },
-  { id: 'VEH-002', registration: 'WP CAB-2190', type: 'Van', capacity: 1000, driver: 'Kamal Silva', status: 'On trip' },
-  { id: 'VEH-003', registration: 'WP LM-7315', type: 'Truck', capacity: 5000, driver: 'Sunil Fernando', status: 'Maintenance' },
+  { id: 'VEH-001', registration: 'WP LK-4821', name: 'Delivery Truck 01', type: 'Truck', capacity: 3500, driver: 'Nimal Perera', status: 'Available' },
+  { id: 'VEH-002', registration: 'WP CAD-7392', name: 'Delivery Van 02', type: 'Van', capacity: 1000, driver: 'Kamal Silva', status: 'In transit' },
+  { id: 'VEH-003', registration: 'CP LB-2156', name: 'Delivery Truck 03', type: 'Truck', capacity: 5000, driver: 'Sunil Fernando', status: 'Maintenance' },
+  { id: 'VEH-004', registration: 'SP CAB-6048', name: 'Delivery Van 04', type: 'Van', capacity: 1200, driver: '', status: 'Inactive' },
 ];
 function useStoredState(key, fallback) {
   const [value, setValue] = useState(() => {
