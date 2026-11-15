@@ -1,5 +1,5 @@
 import { Outlet } from 'react-router-dom';
 
 export default function MainLayout() {
-  return <main className="app-main"><Outlet /></main>;
+  return <div className="app-main"><Outlet /></div>;
 }

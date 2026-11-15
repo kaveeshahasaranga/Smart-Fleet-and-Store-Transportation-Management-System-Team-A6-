@@ -7,6 +7,11 @@ import {
   SignInPage,
   SignUpPage,
 } from '../features/auth/AuthPages.jsx';
+import {
+  DiscrepancyNotePage,
+  GoodsHandoverPage,
+  ReceiptConfirmationPage,
+} from '../features/handover/HandoverPages.jsx';
 
 export default function App() {
   return (
@@ -18,6 +23,9 @@ export default function App() {
           <Route path="signup" element={<SignUpPage />} />
           <Route path="forgot-password" element={<ForgotPasswordPage />} />
           <Route path="reset-password" element={<ResetPasswordPage />} />
+          <Route path="handover" element={<GoodsHandoverPage />} />
+          <Route path="receipt-confirmation" element={<ReceiptConfirmationPage />} />
+          <Route path="discrepancy-note" element={<DiscrepancyNotePage />} />
           <Route path="*" element={<p>Page not found.</p>} />
         </Route>
       </Routes>
