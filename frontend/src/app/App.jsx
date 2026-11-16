@@ -6,6 +6,8 @@ import AdminBookingReviewQueue from '../features/bookings/AdminBookingReviewQueu
 import VehiclesPage from '../features/vehicles/VehiclesPage.jsx';
 import ItemsPage from '../features/items/ItemsPage.jsx';
 import AdminOverviewPage from '../pages/AdminOverviewPage.jsx';
+import TripPlannerPage from '../features/trips/TripPlannerPage.jsx';
+import TripPlanningPage from '../features/trips/TripPlanningPage.jsx';
 import { FleetProvider } from '../context/FleetContext.jsx';
 export default function App() {
   return <FleetProvider><BrowserRouter><Routes><Route element={<MainLayout />}>
@@ -20,6 +22,8 @@ export default function App() {
     <Route path="bookings" element={<AdminBookingReviewQueue />} />
     <Route path="vehicles" element={<VehiclesPage />} />
     <Route path="items" element={<ItemsPage />} />
+    <Route path="trips" element={<TripPlanningPage />} />
+    <Route path="trips/sequence" element={<TripPlannerPage />} />
     <Route path="*" element={<><h1>Admin page not found</h1><a href="/admin/vehicles">Return to vehicles</a></>} />
   </Route></Routes></BrowserRouter></FleetProvider>;
 }

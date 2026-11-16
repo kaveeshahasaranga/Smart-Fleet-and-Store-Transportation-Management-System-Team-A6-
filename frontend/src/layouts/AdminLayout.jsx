@@ -20,7 +20,7 @@ export default function AdminLayout() {
         <NavLink to="/admin/vehicles"><Icon name="van"/>Vehicles</NavLink>
         <NavLink to="/admin/items"><Icon name="grid"/>Item Catalog</NavLink>
         <span className="planned-nav" aria-disabled="true"><Icon name="store"/>Stores</span>
-        <span className="planned-nav" aria-disabled="true"><Icon name="route"/>Trips</span>
+        <NavLink to="/admin/trips"><Icon name="route"/>Trips</NavLink>
       </nav>
       <div className="facility"><Icon name="depot" size={23}/><div><strong>Active depot</strong><small>Colombo Central Hub</small></div></div>
     </aside>
