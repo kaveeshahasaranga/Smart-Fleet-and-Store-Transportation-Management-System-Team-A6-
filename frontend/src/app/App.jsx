@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 
-
 import Home from '../pages/HomePage.jsx'; 
 import AdminStoreManagement from '../features/stores/AdminStoreManagement.jsx';
 import AdminStoreConfiguration from '../features/stores/AdminStoreConfiguration.jsx';
@@ -12,7 +11,7 @@ export default function App() {
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#f5f7fa' }}>
       
-      
+      {/* Top Switcher Bar */}
       <div style={{ 
         backgroundColor: '#1b3b34', 
         color: 'white', 
@@ -57,12 +56,12 @@ export default function App() {
         </button>
       </div>
 
-      
+      {/* Main Content Area (Passing onNavigate to Pages) */}
       <main>
-        {activeTab === 'stores' && <AdminStoreManagement />}
-        {activeTab === 'config' && <AdminStoreConfiguration />}
-        {activeTab === 'schedules' && <AdminStoreScheduleOversight />}
-        {activeTab === 'home' && <Home />}
+        {activeTab === 'stores' && <AdminStoreManagement onNavigate={setActiveTab} />}
+        {activeTab === 'config' && <AdminStoreConfiguration onNavigate={setActiveTab} />}
+        {activeTab === 'schedules' && <AdminStoreScheduleOversight onNavigate={setActiveTab} />}
+        {activeTab === 'home' && <Home onNavigate={setActiveTab} />}
       </main>
 
     </div>
