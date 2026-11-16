@@ -11,5 +11,9 @@
     "dev:backend": "npm run dev --workspace backend",
     "build": "npm run build --workspace frontend",
     "start": "npm run start --workspace backend"
+  },
+  "dependencies": {
+    "framer-motion": "^14.14.0",
+    "lucide-react": "^1.73.0"
   }
 }
