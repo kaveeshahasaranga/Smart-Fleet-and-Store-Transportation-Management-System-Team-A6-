@@ -1,6 +1,6 @@
 # Smart Fleet and Store Transportation Management System
 
-Team A6 MERN project foundation. This scaffold provides the folder structure, a React starter page, and an Express API foundation. Business features, authentication, authorization, database schemas, and real-time tracking are not implemented yet.
+Team A6 MERN project foundation. This project provides the MERN folder structure, three working frontend preview pages, and an Express API foundation. Frontend records are stored locally in the browser. Backend business APIs, authentication, authorization, database schemas, and real-time tracking are not implemented yet.
 
 ## Requirements and setup
 
@@ -83,3 +83,25 @@ Ownership overlaps across frontend and backend; coordinate shared changes in the
 ## Verification status
 
 Dependencies are installed and recorded in package-lock.json. The frontend production build passed. The backend connected to local MongoDB and GET /api/health returned HTTP 200 with status ok. Dependency installation reported zero vulnerabilities after updating React Router. Local .env files were created from the examples and remain ignored by Git.
+
+## Frontend pages
+
+- `/bookings/create`: Two-step delivery form with future-date and Sri Lankan mobile validation, dynamic item rows, positive integer quantities, duplicate item checks, estimated load, and local draft saving.
+- `/admin/vehicles`: Searchable and filterable vehicle directory, summary cards, Add/Edit dialogs, unique registration checks, positive payload validation, and confirmed deletion.
+- `/admin/items`: Searchable and filterable item catalog, Add/Edit dialogs, unique item names, unit weights, categories, and status. Items referenced by a local booking cannot be deleted; deactivate them instead.
+
+The UI follows the supplied teal/mint reference. Navigation and a compact shared header/footer are provided for preview and can be integrated with the team's shared layout later. The admin routes are not access controlled yet.
+
+`FleetContext` seeds sample vehicles/items once and stores changes under `fleetflow.demo.*` localStorage keys. Bookings are browser-only drafts, not transport requests. Data does not synchronize between browsers or team members. Clear these keys in browser developer tools to reset demo data. The item catalog feeds the booking item selectors. Slots and stores are examples until the schedule/store APIs are integrated.
+
+Frontend validation and local persistence were checked through the browser, including multi-item draft saving, duplicate rejection, vehicle creation/edit/search/deletion, item creation/edit/filter/deletion, and item persistence after reload. Production build passed.
+
+## Separate portal layouts
+
+Store pages use `MainLayout` and admin pages use `AdminLayout` under the `/admin` route group. Store navigation does not expose admin links, and admin navigation does not expose store booking creation. Planned pages belonging to other team members appear as disabled navigation labels. Login, role-based redirects, protected routes, and backend authorization remain the authentication owner's integration work; separate layouts do not enforce access control. The store footer is excluded from the admin workspace.
+
+## Vehicle registry reference update
+
+The vehicle screen now uses the reference table layout with registration, vehicle name, type, payload capacity, status badges, Edit, and a per-row delete menu. Status and type filters combine with search; filtered records can be exported as CSV. Pagination displays eight records per page. The admin header search opens the vehicle directory with a search query. Help and notifications describe the local preview. Existing locally saved vehicles are preserved; older records without names display a fallback name, and On trip is displayed as In transit. Fresh browsers receive the four reference sample vehicles.
+
+The production build passed after this update and the local development server returned HTTP 200. Browser visual and interaction checks for this revision could not be completed because the in-app browser could not connect to the local preview. Backend integration and authentication remain pending.

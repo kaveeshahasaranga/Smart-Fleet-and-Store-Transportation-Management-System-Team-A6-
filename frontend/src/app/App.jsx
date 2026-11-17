@@ -1,69 +1,24 @@
-import React, { useState } from 'react';
-
-import Home from '../pages/HomePage.jsx'; 
-import AdminStoreManagement from '../features/stores/AdminStoreManagement.jsx';
-import AdminStoreConfiguration from '../features/stores/AdminStoreConfiguration.jsx';
-import AdminStoreScheduleOversight from '../features/schedules/AdminStoreScheduleOversight.jsx';
-
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import TeamPages from './TeamPages.jsx';
+import '../styles/portal.css';
+import MainLayout from '../layouts/MainLayout.jsx';
+import AdminLayout from '../layouts/AdminLayout.jsx';
+import BookingPage from '../features/bookings/BookingPage.jsx';
+import VehiclesPage from '../features/vehicles/VehiclesPage.jsx';
+import ItemsPage from '../features/items/ItemsPage.jsx';
+import { FleetProvider } from '../context/FleetContext.jsx';
 export default function App() {
-  const [activeTab, setActiveTab] = useState('stores');
+  return <FleetProvider><BrowserRouter><Routes>
+    <Route index element={<TeamPages />} />
+    <Route element={<div className="fleet-portal"><MainLayout /></div>}>
+    <Route path="bookings/create" element={<BookingPage />} />
 
-  return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#f5f7fa' }}>
-      
-      {/* Top Switcher Bar */}
-      <div style={{ 
-        backgroundColor: '#1b3b34', 
-        color: 'white', 
-        padding: '12px 20px', 
-        display: 'flex', 
-        gap: '12px', 
-        alignItems: 'center', 
-        flexWrap: 'wrap', 
-        position: 'sticky', 
-        top: 0, 
-        zIndex: 1000,
-        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-      }}>
-        <span style={{ fontWeight: 'bold', color: '#10b981', fontSize: '14px' }}>FleetFlow Pages:</span>
-        
-        <button 
-          onClick={() => setActiveTab('stores')} 
-          style={{ padding: '6px 14px', background: activeTab === 'stores' ? '#10b981' : '#16302a', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}
-        >
-          Store Management
-        </button>
-
-        <button 
-          onClick={() => setActiveTab('config')} 
-          style={{ padding: '6px 14px', background: activeTab === 'config' ? '#10b981' : '#16302a', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}
-        >
-          Store Config
-        </button>
-
-        <button 
-          onClick={() => setActiveTab('schedules')} 
-          style={{ padding: '6px 14px', background: activeTab === 'schedules' ? '#10b981' : '#16302a', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}
-        >
-          Schedule Oversight
-        </button>
-
-        <button 
-          onClick={() => setActiveTab('home')} 
-          style={{ padding: '6px 14px', background: activeTab === 'home' ? '#10b981' : '#16302a', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}
-        >
-          Home Page
-        </button>
-      </div>
-
-      {/* Main Content Area (Passing onNavigate to Pages) */}
-      <main>
-        {activeTab === 'stores' && <AdminStoreManagement onNavigate={setActiveTab} />}
-        {activeTab === 'config' && <AdminStoreConfiguration onNavigate={setActiveTab} />}
-        {activeTab === 'schedules' && <AdminStoreScheduleOversight onNavigate={setActiveTab} />}
-        {activeTab === 'home' && <Home onNavigate={setActiveTab} />}
-      </main>
-
-    </div>
-  );
+    <Route path="*" element={<><h1>Page not found</h1><a href="/">Return to workspace</a></>} />
+  </Route>
+  <Route path="admin" element={<div className="fleet-portal"><AdminLayout /></div>}>
+    <Route index element={<Navigate to="vehicles" replace />} />
+    <Route path="vehicles" element={<VehiclesPage />} />
+    <Route path="items" element={<ItemsPage />} />
+    <Route path="*" element={<><h1>Admin page not found</h1><a href="/admin/vehicles">Return to vehicles</a></>} />
+  </Route></Routes></BrowserRouter></FleetProvider>;
 }
