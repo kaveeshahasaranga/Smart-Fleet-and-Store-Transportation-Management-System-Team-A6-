@@ -1601,3 +1601,199 @@ a:hover {
   border-radius: 10px;
   font-weight: 700;
 }
+
+/* =========================================================
+   5. ADD NEW STORE MODAL POPUP STYLES (PURE CSS)
+   ========================================================= */
+.ff-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 20px;
+}
+
+.ff-modal-box {
+  background: #ffffff;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 660px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.18);
+  overflow: hidden;
+  animation: ffModalPop 0.2s ease-out;
+}
+
+@keyframes ffModalPop {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.ff-modal-header {
+  padding: 24px 28px 18px;
+  border-bottom: 1px solid #f1f5f9;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.ff-modal-tag {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--primary-green);
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.ff-modal-title {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--text-dark);
+  margin-bottom: 4px;
+}
+
+.ff-modal-sub {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.ff-modal-close {
+  background: none;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+}
+
+.ff-modal-close:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.ff-modal-body {
+  padding: 22px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ff-modal-row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1.6fr;
+  gap: 16px;
+}
+
+.ff-modal-row-equal {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.ff-req {
+  color: #ef4444;
+  margin-left: 2px;
+}
+
+.ff-auto-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.ff-auto-badge {
+  position: absolute;
+  right: 10px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--primary-green);
+}
+
+.ff-auto-pill {
+  position: absolute;
+  right: 10px;
+  font-size: 10px;
+  font-weight: 700;
+  background: #d1fae5;
+  color: #065f46;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+.ff-icon-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.ff-icon-input-wrap svg {
+  position: absolute;
+  left: 12px;
+  color: #94a3b8;
+}
+
+.ff-icon-input-wrap input {
+  padding-left: 36px;
+}
+
+/* Status Radio Cards */
+.ff-status-selector {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.ff-status-option {
+  border: 1.5px solid var(--border-color);
+  border-radius: 10px;
+  padding: 11px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+  background: #ffffff;
+  transition: all 0.15s;
+}
+
+.ff-status-option.selected {
+  border-color: var(--primary-green);
+  background: #f0fdf4;
+  color: #0f172a;
+}
+
+.ff-modal-footer {
+  padding: 16px 28px 24px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 16px;
+}
+
+.ff-btn-cancel {
+  background: none;
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+  padding: 9px 16px;
+}
+
+.ff-btn-cancel:hover {
+  color: #0f172a;
+}

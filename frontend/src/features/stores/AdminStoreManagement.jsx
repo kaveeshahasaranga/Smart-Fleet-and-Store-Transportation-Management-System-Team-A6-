@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import {
   Truck, LayoutGrid, Calendar, Car, Store, GitFork, SlidersHorizontal,
   Clock, Search, HelpCircle, Bell, Download, Plus, CheckCircle2,
-  Ban, Activity, MapPin, Infinity as InfinityIcon, MoreVertical, Network
+  Ban, Activity, MapPin, Infinity as InfinityIcon, MoreVertical, Network,
+  X, User, ArrowRight, Check
 } from 'lucide-react';
 
-const STORES_DATA = [
+const INITIAL_STORES = [
   {
     id: 'STR-104',
     name: 'Nugegoda Super Center #104',
@@ -69,11 +70,63 @@ const STORES_DATA = [
 ];
 
 export default function AdminStoreManagement({ onNavigate }) {
+  const [stores, setStores] = useState(INITIAL_STORES);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All statuses');
   const [regionFilter, setRegionFilter] = useState('All Regions');
 
-  const filteredStores = STORES_DATA.filter((store) => {
+  // Add Store Modal States
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [newStoreId, setNewStoreId] = useState('STR-502');
+  const [storeName, setStoreName] = useState('');
+  const [streetAddress, setStreetAddress] = useState('');
+  const [cityRegion, setCityRegion] = useState('Colombo (Western Province)');
+  const [gpsCoords, setGpsCoords] = useState('6.8649° N, 79.8997° E');
+  const [contactPerson, setContactPerson] = useState('');
+  const [operatingHours, setOperatingHours] = useState('07:00 – 21:00');
+  const [selectedStatus, setSelectedStatus] = useState('Active');
+
+  const openAddModal = () => {
+    const randomNum = Math.floor(510 + Math.random() * 400);
+    setNewStoreId(`STR-${randomNum}`);
+    setStoreName('');
+    setStreetAddress('');
+    setContactPerson('');
+    setOperatingHours('07:00 – 21:00');
+    setSelectedStatus('Active');
+    setIsModalOpen(true);
+  };
+
+  const handleRegisterStore = (e) => {
+    e.preventDefault();
+    if (!storeName.trim() || !streetAddress.trim() || !contactPerson.trim()) {
+      alert('Please fill in Store Name, Address, and Contact Person.');
+      return;
+    }
+
+    // Extract contact name & phone if formatted like "Kasun Herath (+94 77 124 9901)"
+    const phoneMatch = contactPerson.match(/\(([^)]+)\)/);
+    const phone = phoneMatch ? phoneMatch[1] : '+94 77 000 0000';
+    const nameOnly = contactPerson.replace(/\s*\([^)]*\)/, '').trim();
+
+    const newEntry = {
+      id: newStoreId,
+      name: storeName,
+      address: streetAddress,
+      location: cityRegion.replace(' Province', ''),
+      coords: gpsCoords,
+      contact: nameOnly,
+      phone: phone,
+      hours: operatingHours,
+      isShifted: operatingHours.toLowerCase().includes('24'),
+      status: selectedStatus,
+    };
+
+    setStores([newEntry, ...stores]);
+    setIsModalOpen(false);
+  };
+
+  const filteredStores = stores.filter((store) => {
     const matchesSearch =
       store.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       store.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -170,7 +223,7 @@ export default function AdminStoreManagement({ onNavigate }) {
               <button className="ff-btn-secondary">
                 <Download size={15} /> Export CSV
               </button>
-              <button className="ff-btn-primary">
+              <button className="ff-btn-primary" onClick={openAddModal}>
                 <Plus size={16} /> Add Store
               </button>
             </div>
@@ -180,7 +233,7 @@ export default function AdminStoreManagement({ onNavigate }) {
             <div className="ff-kpi-card">
               <div>
                 <div className="ff-kpi-label">TOTAL REGISTERED</div>
-                <div className="ff-kpi-value" style={{ color: '#0f172a' }}>48</div>
+                <div className="ff-kpi-value" style={{ color: '#0f172a' }}>{43 + stores.length}</div>
               </div>
               <div className="ff-kpi-icon-box" style={{ background: '#f8fafc', color: '#475569' }}>
                 <Store size={19} />
@@ -240,6 +293,7 @@ export default function AdminStoreManagement({ onNavigate }) {
                   <option value="Active">Active</option>
                   <option value="Active Depot">Active Depot</option>
                   <option value="Maintenance">Maintenance</option>
+                  <option value="Inactive">Inactive</option>
                 </select>
 
                 <select
@@ -298,7 +352,9 @@ export default function AdminStoreManagement({ onNavigate }) {
                     <td>
                       <span
                         className={`ff-status-pill ${
-                          store.status === 'Maintenance' ? 'ff-status-maint' : 'ff-status-active'
+                          store.status === 'Maintenance' || store.status === 'Inactive'
+                            ? 'ff-status-maint'
+                            : 'ff-status-active'
                         }`}
                       >
                         <span
@@ -306,7 +362,10 @@ export default function AdminStoreManagement({ onNavigate }) {
                             width: '6px',
                             height: '6px',
                             borderRadius: '50%',
-                            background: store.status === 'Maintenance' ? '#dc2626' : '#059669',
+                            background:
+                              store.status === 'Maintenance' || store.status === 'Inactive'
+                                ? '#dc2626'
+                                : '#059669',
                           }}
                         ></span>
                         {store.status}
@@ -324,7 +383,7 @@ export default function AdminStoreManagement({ onNavigate }) {
             </table>
 
             <div className="ff-pagination">
-              <div>Showing <strong>1</strong> to <strong>{filteredStores.length}</strong> of <strong>48</strong> stores</div>
+              <div>Showing <strong>1</strong> to <strong>{filteredStores.length}</strong> of <strong>{43 + stores.length}</strong> stores</div>
               <div className="ff-page-btns">
                 <button className="ff-page-btn" disabled style={{ color: '#94a3b8' }}>Previous</button>
                 <button className="ff-page-btn active">1</button>
@@ -341,6 +400,196 @@ export default function AdminStoreManagement({ onNavigate }) {
           <span style={{ color: '#059669', fontWeight: 600 }}>• Systems Operational</span>
         </footer>
       </div>
+
+      {/* =========================================================
+          ADD NEW STORE MODAL POPUP
+         ========================================================= */}
+      {isModalOpen && (
+        <div className="ff-modal-overlay" onClick={() => setIsModalOpen(false)}>
+          <div className="ff-modal-box" onClick={(e) => e.stopPropagation()}>
+            <div className="ff-modal-header">
+              <div>
+                <div className="ff-modal-tag">
+                  <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#245a4f' }}></span>
+                  STORE ONBOARDING & SETUP
+                </div>
+                <h2 className="ff-modal-title">Add New Store</h2>
+                <p className="ff-modal-sub">
+                  Register a new retail branch, fulfillment hub, or delivery drop point to the FleetFlow network.
+                </p>
+              </div>
+              <button className="ff-modal-close" onClick={() => setIsModalOpen(false)}>
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleRegisterStore}>
+              <div className="ff-modal-body">
+                {/* Row 1: Store ID & Store Name */}
+                <div className="ff-modal-row-2">
+                  <div>
+                    <label className="ff-field-label">STORE ID <span className="ff-req">*</span></label>
+                    <div className="ff-auto-input-wrap">
+                      <input className="ff-input" value={newStoreId} readOnly style={{ fontWeight: 700 }} />
+                      <span className="ff-auto-badge">Auto-Generated</span>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="ff-field-label">STORE NAME <span className="ff-req">*</span></label>
+                    <input
+                      className="ff-input"
+                      placeholder="e.g. Nugegoda Super Center #104"
+                      value={storeName}
+                      onChange={(e) => setStoreName(e.target.value)}
+                      required
+                    />
+                  </div>
+                </div>
+
+                {/* Row 2: Location / Street Address */}
+                <div>
+                  <label className="ff-field-label">LOCATION / STREET ADDRESS <span className="ff-req">*</span></label>
+                  <div className="ff-icon-input-wrap">
+                    <MapPin size={16} />
+                    <input
+                      className="ff-input"
+                      placeholder="e.g. 48 Sir Marcus Fernando Mawatha, Colombo 00700"
+                      value={streetAddress}
+                      onChange={(e) => setStreetAddress(e.target.value)}
+                      required
+                    />
+                  </div>
+                </div>
+
+                {/* Row 3: City / Region & GPS Coordinates */}
+                <div className="ff-modal-row-equal">
+                  <div>
+                    <label className="ff-field-label">CITY / LOGISTICS REGION <span className="ff-req">*</span></label>
+                    <select
+                      className="ff-input"
+                      value={cityRegion}
+                      onChange={(e) => {
+                        setCityRegion(e.target.value);
+                        if (e.target.value.includes('Central')) setGpsCoords('7.2906° N, 80.6337° E');
+                        else if (e.target.value.includes('Southern')) setGpsCoords('6.0267° N, 80.2170° E');
+                        else setGpsCoords('6.8649° N, 79.8997° E');
+                      }}
+                    >
+                      <option value="Colombo (Western Province)">Colombo (Western Province)</option>
+                      <option value="Kandy (Central Province)">Kandy (Central Province)</option>
+                      <option value="Galle (Southern Province)">Galle (Southern Province)</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="ff-field-label">GPS COORDINATES</label>
+                    <div className="ff-auto-input-wrap">
+                      <input
+                        className="ff-input"
+                        value={gpsCoords}
+                        onChange={(e) => setGpsCoords(e.target.value)}
+                        style={{ fontFamily: 'monospace', fontSize: '12px' }}
+                      />
+                      <span className="ff-auto-pill">Auto-Pinned</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Row 4: Contact Person & Operating Hours */}
+                <div className="ff-modal-row-equal">
+                  <div>
+                    <label className="ff-field-label">CONTACT PERSON <span className="ff-req">*</span></label>
+                    <div className="ff-icon-input-wrap">
+                      <User size={16} />
+                      <input
+                        className="ff-input"
+                        placeholder="e.g. Kasun Herath (+94 77 124 9901)"
+                        value={contactPerson}
+                        onChange={(e) => setContactPerson(e.target.value)}
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="ff-field-label">OPERATING HOURS <span className="ff-req">*</span></label>
+                    <div className="ff-icon-input-wrap">
+                      <Clock size={16} />
+                      <input
+                        className="ff-input"
+                        placeholder="07:00 – 21:00"
+                        value={operatingHours}
+                        onChange={(e) => setOperatingHours(e.target.value)}
+                        required
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Row 5: Status Selector */}
+                <div>
+                  <label className="ff-field-label">STATUS <span className="ff-req">*</span></label>
+                  <div className="ff-status-selector">
+                    <div
+                      className={`ff-status-option ${selectedStatus === 'Active' ? 'selected' : ''}`}
+                      onClick={() => setSelectedStatus('Active')}
+                    >
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10b981' }}></span>
+                        Active
+                      </span>
+                      {selectedStatus === 'Active' && (
+                        <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#245a4f', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <Check size={11} />
+                        </span>
+                      )}
+                    </div>
+
+                    <div
+                      className={`ff-status-option ${selectedStatus === 'Maintenance' ? 'selected' : ''}`}
+                      onClick={() => setSelectedStatus('Maintenance')}
+                    >
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#94a3b8' }}></span>
+                        Maintenance
+                      </span>
+                      {selectedStatus === 'Maintenance' && (
+                        <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#245a4f', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <Check size={11} />
+                        </span>
+                      )}
+                    </div>
+
+                    <div
+                      className={`ff-status-option ${selectedStatus === 'Inactive' ? 'selected' : ''}`}
+                      onClick={() => setSelectedStatus('Inactive')}
+                    >
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#ef4444' }}></span>
+                        Inactive
+                      </span>
+                      {selectedStatus === 'Inactive' && (
+                        <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#245a4f', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <Check size={11} />
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="ff-modal-footer">
+                <button type="button" className="ff-btn-cancel" onClick={() => setIsModalOpen(false)}>
+                  Cancel
+                </button>
+                <button type="submit" className="ff-btn-primary">
+                  Register & Add Store <ArrowRight size={15} />
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
