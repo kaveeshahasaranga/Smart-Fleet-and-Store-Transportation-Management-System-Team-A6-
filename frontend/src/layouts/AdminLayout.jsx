@@ -21,6 +21,8 @@ export default function AdminLayout() {
         <NavLink to="/admin/items"><Icon name="grid"/>Item Catalog</NavLink>
         <span className="planned-nav" aria-disabled="true"><Icon name="store"/>Stores</span>
         <NavLink to="/admin/trips"><Icon name="route"/>Trips</NavLink>
+        <span className="planned-nav" aria-disabled="true"><Icon name="store"/>Store configuration</span>
+        <span className="planned-nav" aria-disabled="true"><Icon name="calendar"/>Store schedule</span>
       </nav>
       <div className="facility"><Icon name="depot" size={23}/><div><strong>Active depot</strong><small>Colombo Central Hub</small></div></div>
     </aside>
