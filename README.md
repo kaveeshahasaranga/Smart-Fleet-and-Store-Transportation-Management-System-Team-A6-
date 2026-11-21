@@ -1,18 +1,18 @@
 # Smart Fleet and Store Transportation Management System
 
-Team A6 MERN project foundation. This project provides the MERN folder structure, three working frontend preview pages, and an Express API foundation. Frontend records are stored locally in the browser. Backend business APIs, authentication, authorization, database schemas, and real-time tracking are not implemented yet.
+Team A6 project foundation with a React frontend, Express API, and MySQL-backed trip persistence. Authentication, authorization, and real-time tracking are not implemented yet.
 
 ## Requirements and setup
 
-Use Node.js 22.12 or newer and a running local MongoDB instance or MongoDB Atlas database.
+Use Node.js 22.12 or newer and a running local MySQL server.
 
 1. Run `npm install` from the project root to install both workspaces.
 2. Copy `frontend/.env.example` to `frontend/.env`.
-3. Copy `backend/.env.example` to `backend/.env` and set `MONGODB_URI`.
+3. Create the database with `CREATE DATABASE smart_fleet_store;`, then copy `backend/.env.example` to `backend/.env` and set the MySQL connection values.
 4. In one terminal at the project root, run `npm run dev:backend`.
 5. In another terminal at the project root, run `npm run dev:frontend`.
 
-Frontend: http://localhost:5173. API health check: http://localhost:5000/api/health. The backend connects to MongoDB before accepting requests. Keep real credentials in local `.env` files; these files are ignored by Git. Vite environment values are public, so never put secrets in frontend variables.
+Frontend: http://localhost:5173. API health check: http://localhost:5000/api/health. The backend connects to MySQL and creates the trip tables before accepting requests. Keep real credentials in local `.env` files; these files are ignored by Git. Vite environment values are public, so never put secrets in frontend variables.
 
 Run `npm run build` to build the frontend, `npm run preview --workspace frontend` to preview that build, and `npm start` to start the backend without watch mode. These are local development foundations, not deployment configuration.
 
@@ -82,7 +82,7 @@ Ownership overlaps across frontend and backend; coordinate shared changes in the
 
 ## Verification status
 
-Dependencies are installed and recorded in package-lock.json. The frontend production build passed. The backend connected to local MongoDB and GET /api/health returned HTTP 200 with status ok. Dependency installation reported zero vulnerabilities after updating React Router. Local .env files were created from the examples and remain ignored by Git.
+Dependencies are recorded in package-lock.json. The trip API now creates its MySQL tables at startup; database-backed trip operations still need to be exercised against a configured MySQL server. Local `.env` files are ignored by Git.
 
 ## Frontend pages
 

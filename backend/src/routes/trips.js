@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { randomUUID } from 'node:crypto';
-import Trip from '../models/Trip.js';
+import { createTrip, getTrip, listTrips, updateTrip } from '../models/Trip.js';
 
 const router = Router();
 const asyncRoute = handler => (req, res, next) => Promise.resolve(handler(req, res, next)).catch(next);
@@ -9,7 +9,7 @@ const isRecord = value => value !== null && typeof value === 'object' && !Array.
 const finiteNonNegative = value => Number.isFinite(Number(value)) && Number(value) >= 0;
 
 router.get('/', asyncRoute(async (_req, res) => {
-  const trips = await Trip.find().sort({ createdAt: -1 }).lean();
+  const trips = await listTrips();
   res.json({ trips });
 }));
 
@@ -48,7 +48,7 @@ router.post('/', asyncRoute(async (req, res) => {
     return res.status(400).json({ message: 'Trip load exceeds the selected vehicle capacity.' });
   }
 
-  const trip = await Trip.create({
+  const trip = await createTrip({
     ...Object.fromEntries(mutableFields.filter(field => field in body).map(field => [field, body[field]])),
     tripCode: String(body.tripCode || `TRP-${randomUUID().slice(0, 8).toUpperCase()}`).trim(),
     totalLoad,
@@ -58,7 +58,7 @@ router.post('/', asyncRoute(async (req, res) => {
 }));
 
 router.get('/:tripCode', asyncRoute(async (req, res) => {
-  const trip = await Trip.findOne({ tripCode: req.params.tripCode }).lean();
+  const trip = await getTrip(req.params.tripCode);
   if (!trip) return res.status(404).json({ message: 'Trip not found.' });
   res.json({ trip });
 }));
@@ -66,14 +66,14 @@ router.get('/:tripCode', asyncRoute(async (req, res) => {
 router.patch('/:tripCode', asyncRoute(async (req, res) => {
   const updates = Object.fromEntries(mutableFields.filter(field => field in (req.body || {})).map(field => [field, req.body[field]]));
   if (Array.isArray(updates.stops)) updates.stops = updates.stops.map((stop, sequence) => ({ ...stop, sequence: sequence + 1 }));
-  const existing = await Trip.findOne({ tripCode: req.params.tripCode });
+  const existing = await getTrip(req.params.tripCode);
   if (!existing) return res.status(404).json({ message: 'Trip not found.' });
   const nextLoad = updates.totalLoad ?? (updates.stops ? updates.stops.reduce((sum, stop) => sum + Number(stop.load || 0), 0) : existing.totalLoad);
   const nextCapacity = Number(updates.vehicle?.capacity ?? existing.vehicle.capacity);
   if (nextLoad > nextCapacity) return res.status(400).json({ message: 'Trip load exceeds the selected vehicle capacity.' });
   if (updates.stops && !('totalLoad' in updates)) updates.totalLoad = nextLoad;
-  existing.set(updates);
-  const trip = await existing.save();
+  const trip = await updateTrip(req.params.tripCode, updates);
+  if (!trip) return res.status(404).json({ message: 'Trip not found.' });
   res.json({ trip });
 }));
 
