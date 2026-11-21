@@ -12,15 +12,17 @@ export default function AdminLayout() {
 
   return <div className="admin-shell">
     <aside className="sidebar admin-sidebar">
-      <NavLink to="/admin/vehicles" className="brand"><span className="brand-icon"><Icon name="truck" size={21}/></span>FleetFlow<span className="admin-tag">ADMIN</span></NavLink>
+      <NavLink to="/admin/overview" className="brand"><span className="brand-icon"><Icon name="truck" size={21}/></span>FleetFlow<span className="admin-tag">ADMIN</span></NavLink>
       <p className="eyebrow">OPERATIONS</p>
       <nav aria-label="Admin navigation">
-        <span className="planned-nav" aria-disabled="true"><Icon name="grid"/>Overview</span>
-        <span className="planned-nav" aria-disabled="true"><Icon name="calendar"/>Bookings</span>
+        <NavLink to="/admin/overview"><Icon name="grid"/>Overview</NavLink>
+        <NavLink to="/admin/bookings"><Icon name="calendar"/>Bookings</NavLink>
         <NavLink to="/admin/vehicles"><Icon name="van"/>Vehicles</NavLink>
         <NavLink to="/admin/items"><Icon name="grid"/>Item Catalog</NavLink>
         <span className="planned-nav" aria-disabled="true"><Icon name="store"/>Stores</span>
-        <span className="planned-nav" aria-disabled="true"><Icon name="route"/>Trips</span>
+        <NavLink to="/admin/trips"><Icon name="route"/>Trips</NavLink>
+        <span className="planned-nav" aria-disabled="true"><Icon name="store"/>Store configuration</span>
+        <span className="planned-nav" aria-disabled="true"><Icon name="calendar"/>Store schedule</span>
       </nav>
       <div className="facility"><Icon name="depot" size={23}/><div><strong>Active depot</strong><small>Colombo Central Hub</small></div></div>
     </aside>
