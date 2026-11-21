@@ -1,32 +1,71 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useEffect, useRef, useState } from 'react';
+import { apiRequest } from '../services/api.js';
 const FleetContext = createContext(null);
-const initialItems = [
-  { id: 'ITM-001', name: 'Rice bags', category: 'Dry goods', unit: 'bag', weight: 25, status: 'Active' },
-  { id: 'ITM-002', name: 'Milk cartons', category: 'Dairy', unit: 'carton', weight: 12, status: 'Active' },
-  { id: 'ITM-003', name: 'Fresh vegetables', category: 'Produce', unit: 'crate', weight: 15, status: 'Active' },
-];
-const initialVehicles = [
-  { id: 'VEH-001', registration: 'WP LK-4821', name: 'Delivery Truck 01', type: 'Truck', capacity: 3500, driver: 'Nimal Perera', status: 'Available' },
-  { id: 'VEH-002', registration: 'WP CAD-7392', name: 'Delivery Van 02', type: 'Van', capacity: 1000, driver: 'Kamal Silva', status: 'In transit' },
-  { id: 'VEH-003', registration: 'CP LB-2156', name: 'Delivery Truck 03', type: 'Truck', capacity: 5000, driver: 'Sunil Fernando', status: 'Maintenance' },
-  { id: 'VEH-004', registration: 'SP CAB-6048', name: 'Delivery Van 04', type: 'Van', capacity: 1200, driver: '', status: 'Inactive' },
-];
-function useStoredState(key, fallback) {
-  const [value, setValue] = useState(() => {
-    try { const saved = JSON.parse(localStorage.getItem(key)); return Array.isArray(saved) ? saved : fallback; }
-    catch { return fallback; }
-  });
-  function update(next) {
-    try { localStorage.setItem(key, JSON.stringify(next)); }
-    catch { throw new Error('Unable to save in this browser. Check storage permissions or available space.'); }
-    setValue(next);
-  }
-  return [value, update];
+
+function readDrafts() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('fleetflow.demo.bookings'));
+    return Array.isArray(saved) ? saved : [];
+  } catch { return []; }
 }
+
 export function FleetProvider({ children }) {
-  const [items, setItems] = useStoredState('fleetflow.demo.items', initialItems);
-  const [vehicles, setVehicles] = useStoredState('fleetflow.demo.vehicles', initialVehicles);
-  const [bookings, setBookings] = useStoredState('fleetflow.demo.bookings', []);
-  return <FleetContext.Provider value={{ items, setItems, vehicles, setVehicles, bookings, setBookings }}>{children}</FleetContext.Provider>;
+  const [items, setItems] = useState([]);
+  const [vehicles, setVehicles] = useState([]);
+  const [bookings, updateBookings] = useState(readDrafts);
+  const [loading, setLoading] = useState(true);
+  const [dataError, setDataError] = useState('');
+  const generation = useRef(0);
+
+  async function refreshData() {
+    const request = ++generation.current;
+    setLoading(true);
+    setDataError('');
+    const [catalog, fleet] = await Promise.allSettled([apiRequest('/items'), apiRequest('/vehicles')]);
+    if (request !== generation.current) return;
+    setItems(catalog.status === 'fulfilled' ? catalog.value.data : []);
+    setVehicles(fleet.status === 'fulfilled' ? fleet.value.data : []);
+    // Store accounts can read the active catalog without fleet administration access.
+    const failures = [catalog, fleet].filter(result => result.status === 'rejected' && result.reason.status !== 403);
+    if (failures.length) setDataError(failures[0].reason.message || 'Could not load fleet data.');
+    setLoading(false);
+  }
+
+  useEffect(() => {
+    refreshData();
+    window.addEventListener('fleet-auth-changed', refreshData);
+    return () => {
+      generation.current++;
+      window.removeEventListener('fleet-auth-changed', refreshData);
+    };
+  }, []);
+
+  async function saveRecord(kind, record) {
+    const fields = kind === 'vehicles'
+      ? ['registration', 'name', 'type', 'capacity', 'driver', 'status', 'version']
+      : ['name', 'category', 'unit', 'weight', 'status', 'version'];
+    const body = Object.fromEntries(fields.filter(field => record[field] !== undefined).map(field => [field, record[field]]));
+    const result = await apiRequest(`/${kind}${record.id ? '/' + record.id : ''}`, {
+      method: record.id ? 'PUT' : 'POST', body: JSON.stringify(body),
+    });
+    const update = kind === 'vehicles' ? setVehicles : setItems;
+    update(current => [...current.filter(row => row.id !== result.data.id), result.data]);
+    return result.data;
+  }
+
+  async function deleteRecord(kind, record) {
+    await apiRequest(`/${kind}/${record.id}`, { method: 'DELETE', body: JSON.stringify({ version: record.version }) });
+    const update = kind === 'vehicles' ? setVehicles : setItems;
+    update(current => current.filter(row => row.id !== record.id));
+  }
+
+  function setBookings(next) {
+    localStorage.setItem('fleetflow.demo.bookings', JSON.stringify(next));
+    updateBookings(next);
+  }
+
+  return <FleetContext.Provider value={{
+    items, vehicles, bookings, setBookings, loading, dataError, refreshData, saveRecord, deleteRecord,
+  }}>{children}</FleetContext.Provider>;
 }
 export function useFleet() { return useContext(FleetContext); }
