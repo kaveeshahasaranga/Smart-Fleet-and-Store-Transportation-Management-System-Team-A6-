@@ -52,6 +52,37 @@ export async function connectDatabase() {
       CONSTRAINT fk_trip_stops_trip FOREIGN KEY (trip_code) REFERENCES trips (trip_code) ON DELETE CASCADE
     ) ENGINE=InnoDB
   `);
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS vehicle_latest_locations (
+      vehicle_id VARCHAR(100) PRIMARY KEY,
+      trip_code VARCHAR(64) NULL,
+      registration VARCHAR(40) NOT NULL DEFAULT '',
+      latitude DECIMAL(10, 7) NOT NULL,
+      longitude DECIMAL(10, 7) NOT NULL,
+      speed_kph DECIMAL(7, 2) NULL,
+      heading_deg DECIMAL(6, 2) NULL,
+      recorded_at DATETIME(3) NOT NULL,
+      received_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      INDEX idx_vehicle_location_trip (trip_code),
+      INDEX idx_vehicle_location_recorded (recorded_at)
+    ) ENGINE=InnoDB
+  `);
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS vehicle_location_events (
+      id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+      vehicle_id VARCHAR(100) NOT NULL,
+      trip_code VARCHAR(64) NULL,
+      registration VARCHAR(40) NOT NULL DEFAULT '',
+      latitude DECIMAL(10, 7) NOT NULL,
+      longitude DECIMAL(10, 7) NOT NULL,
+      speed_kph DECIMAL(7, 2) NULL,
+      heading_deg DECIMAL(6, 2) NULL,
+      recorded_at DATETIME(3) NOT NULL,
+      received_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      INDEX idx_location_events_vehicle_time (vehicle_id, recorded_at),
+      INDEX idx_location_events_trip_time (trip_code, recorded_at)
+    ) ENGINE=InnoDB
+  `);
   await pool.query('SELECT 1');
   console.log('MySQL connected');
 }

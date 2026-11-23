@@ -96,6 +96,10 @@ The UI follows the supplied teal/mint reference. Navigation and a compact shared
 
 Frontend validation and local persistence were checked through the browser, including multi-item draft saving, duplicate rejection, vehicle creation/edit/search/deletion, item creation/edit/filter/deletion, and item persistence after reload. Production build passed.
 
+## GPS tracking API
+
+The backend stores latest vehicle coordinates and a location history when it starts. Send GPS reports to `POST /api/tracking/locations` as JSON with `vehicleId`, `latitude`, and `longitude`; optional fields are `tripCode`, `registration`, `speedKph`, `heading`, and `recordedAt`. Read current positions from `GET /api/tracking/locations`, a vehicle’s latest position from `GET /api/tracking/locations/:vehicleId`, and its recent history from `GET /api/tracking/locations/:vehicleId/history?limit=100`. The trip planner refreshes current positions every 10 seconds. Set `VITE_GOOGLE_MAPS_API_KEY` in `frontend/.env` to enable the interactive Google map; without it the location list and static map preview remain available.
+
 ## Separate portal layouts
 
 Store pages use `MainLayout` and admin pages use `AdminLayout` under the `/admin` route group. Store navigation does not expose admin links, and admin navigation does not expose store booking creation. Planned pages belonging to other team members appear as disabled navigation labels. Login, role-based redirects, protected routes, and backend authorization remain the authentication owner's integration work; separate layouts do not enforce access control. The store footer is excluded from the admin workspace.
