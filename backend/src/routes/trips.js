@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { randomUUID } from 'node:crypto';
 import { createTrip, getTrip, listTrips, updateTrip } from '../models/Trip.js';
+import { allocateVehicle, generateStopSequence } from '../services/tripPlanning.js';
 
 const router = Router();
 const asyncRoute = handler => (req, res, next) => Promise.resolve(handler(req, res, next)).catch(next);
@@ -55,6 +56,37 @@ router.post('/', asyncRoute(async (req, res) => {
     stops: stops.map((stop, sequence) => ({ ...stop, sequence: sequence + 1 })),
   });
   res.location(`/api/trips/${encodeURIComponent(trip.tripCode)}`).status(201).json({ trip });
+}));
+
+router.post('/:tripCode/sequence/generate', asyncRoute(async (req, res) => {
+  const current = await getTrip(req.params.tripCode);
+  if (!current) return res.status(404).json({ message: 'Trip not found.' });
+  if (current.stops.length < 2) return res.status(400).json({ message: 'Add at least two delivery stops to generate a sequence.' });
+
+  const generated = generateStopSequence(current.stops);
+  const totalLoad = generated.stops.reduce((sum, stop) => sum + Number(stop.load || 0), 0);
+  const trip = await updateTrip(req.params.tripCode, {
+    stops: generated.stops,
+    totalLoad,
+    totalDistance: generated.totalDistance,
+  });
+  res.json({ trip, strategy: generated.strategy });
+}));
+
+router.post('/:tripCode/allocate', asyncRoute(async (req, res) => {
+  const current = await getTrip(req.params.tripCode);
+  if (!current) return res.status(404).json({ message: 'Trip not found.' });
+  if (!Array.isArray(req.body?.vehicles)) return res.status(400).json({ message: 'Provide the available fleet vehicles for allocation.' });
+
+  const stopLoad = current.stops.reduce((sum, stop) => sum + Number(stop.load || 0), 0);
+  const load = Math.max(Number(current.totalLoad || 0), stopLoad);
+  const allocation = allocateVehicle({ load, vehicles: req.body.vehicles, requiredType: req.body.requiredType });
+  const trip = await updateTrip(req.params.tripCode, {
+    vehicle: allocation.vehicle,
+    driver: allocation.driver || current.driver,
+    totalLoad: load,
+  });
+  res.json({ trip, allocation: { remainingCapacity: allocation.remainingCapacity, utilizationPercent: allocation.utilizationPercent } });
 }));
 
 router.get('/:tripCode', asyncRoute(async (req, res) => {

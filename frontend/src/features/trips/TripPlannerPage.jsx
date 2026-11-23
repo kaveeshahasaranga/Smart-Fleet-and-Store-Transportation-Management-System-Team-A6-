@@ -4,7 +4,7 @@ import Icon from '../../components/common/Icon.jsx';
 import Modal from '../../components/common/Modal.jsx';
 import { useFleet } from '../../context/FleetContext.jsx';
 import LiveMapPanel from './LiveMapPanel.jsx';
-import { getTrip, updateTrip } from '../../services/trips.js';
+import { allocateTripVehicle, generateTripSequence, getTrip, updateTrip } from '../../services/trips.js';
 
 const depot = {
   name: 'Western Depot #04 (Colombo Central Hub)',
@@ -48,6 +48,7 @@ export default function TripPlannerPage() {
   const [activeTrip, setActiveTrip] = useState(null);
   const [apiState, setApiState] = useState('loading');
   const [apiMessage, setApiMessage] = useState('Loading trip sequence…');
+  const [engineBusy, setEngineBusy] = useState(false);
   const [draggedId, setDraggedId] = useState(null);
   const [showAddStop, setShowAddStop] = useState(false);
   const [addStopForm, setAddStopForm] = useState({ bookingId: '', waypointId: '', weight: '', cartons: '', notes: '' });
@@ -114,6 +115,49 @@ export default function TripPlannerPage() {
     } catch (error) {
       setApiState('offline');
       setApiMessage(`Could not save trip changes to the backend. ${error.message}`);
+    }
+  }
+
+  async function generateSequence() {
+    if (!activeTrip || stops.length < 2 || engineBusy) return;
+    setEngineBusy(true);
+    setApiState('saving');
+    setApiMessage('Generating a distance-based stop sequence…');
+    try {
+      const { trip, strategy } = await generateTripSequence(tripCode);
+      setActiveTrip(trip);
+      setStops(trip.stops.map(stop => ({ ...stop, id: stop.stopId, tag: stop.tag || 'Store drop-off' })));
+      setAnnouncement(`Sequence generated. ${strategy}.`);
+      setApiState('connected');
+      setApiMessage(`Sequence generated and saved. ${strategy}.`);
+    } catch (error) {
+      setApiState('offline');
+      setApiMessage(`Could not generate the sequence. ${error.message}`);
+    } finally {
+      setEngineBusy(false);
+    }
+  }
+
+  async function autoAllocateVehicle() {
+    if (!activeTrip || !availableVehicles.length || engineBusy) return;
+    setEngineBusy(true);
+    setApiState('saving');
+    setApiMessage('Finding the smallest available vehicle that fits this trip…');
+    try {
+      const { trip, allocation } = await allocateTripVehicle(tripCode, availableVehicles);
+      const assigned = availableVehicles.find(item => item.id === trip.vehicle.id);
+      setActiveTrip(trip);
+      setSelectedVehicleId(trip.vehicle.id);
+      if (trip.driver && trip.driver !== assigned?.driver) {
+        setDriverOverrides(current => ({ ...current, [trip.vehicle.id]: trip.driver }));
+      }
+      setApiState('connected');
+      setApiMessage(`Allocated ${trip.vehicle.registration} with ${allocation.remainingCapacity.toLocaleString()} kg remaining (${allocation.utilizationPercent}% utilized).`);
+    } catch (error) {
+      setApiState('offline');
+      setApiMessage(`Could not allocate a vehicle. ${error.message}`);
+    } finally {
+      setEngineBusy(false);
     }
   }
 
@@ -254,7 +298,7 @@ export default function TripPlannerPage() {
     </section>
 
     <section className="trip-allocation-panel" aria-labelledby="trip-allocation-title">
-      <div className="trip-allocation-heading"><div><h2 id="trip-allocation-title">Vehicle Allocation</h2><p>Select an available vehicle and review its assigned driver and payload capacity.</p></div><span className={`trip-capacity-status${exceedsCapacity ? ' over-capacity' : ''}`}>{exceedsCapacity ? 'Over capacity' : selectedVehicle ? 'Capacity checked' : 'Vehicle required'}</span></div>
+      <div className="trip-allocation-heading"><div><h2 id="trip-allocation-title">Vehicle Allocation</h2><p>Find the smallest available vehicle that can carry the full trip load.</p></div><div className="trip-engine-actions"><button type="button" className="secondary trip-engine-button" onClick={autoAllocateVehicle} disabled={!activeTrip || !availableVehicles.length || engineBusy}>{engineBusy ? 'Allocating…' : 'Auto Allocate'}</button><span className={`trip-capacity-status${exceedsCapacity ? ' over-capacity' : ''}`}>{exceedsCapacity ? 'Over capacity' : selectedVehicle ? 'Capacity checked' : 'Vehicle required'}</span></div></div>
       <div className="trip-allocation-grid">
         <label className="trip-vehicle-select">Available vehicle
           <select value={selectedVehicle?.id || ''} onChange={event => selectTripVehicle(event.target.value)} disabled={!availableVehicles.length}>
@@ -275,9 +319,14 @@ export default function TripPlannerPage() {
     <section className="trip-sequence-panel" aria-labelledby="trip-sequence-title">
       <div className="trip-sequence-heading">
         <div><h2 id="trip-sequence-title">Stop-by-Stop Waypoint Sequence</h2><p>Drag a delivery stop to reorder the run, or use the move controls.</p></div>
-        <button className="trip-add-stop-button" type="button" onClick={openAddStop} disabled={!availableStops.length && !availableBookings.length}>
-          <span aria-hidden="true">+</span> Add Stop to Sequence
-        </button>
+        <div className="trip-sequence-actions">
+          <button className="trip-add-stop-button" type="button" onClick={generateSequence} disabled={!activeTrip || stops.length < 2 || engineBusy}>
+            {engineBusy ? 'Generating…' : 'Generate Sequence'}
+          </button>
+          <button className="trip-add-stop-button" type="button" onClick={openAddStop} disabled={!availableStops.length && !availableBookings.length}>
+            <span aria-hidden="true">+</span> Add Stop to Sequence
+          </button>
+        </div>
       </div>
 
       <ol className="trip-stop-list" aria-label="Delivery stop sequence">

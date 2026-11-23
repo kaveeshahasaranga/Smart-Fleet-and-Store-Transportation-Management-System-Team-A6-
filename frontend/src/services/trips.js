@@ -21,3 +21,11 @@ export async function createTrip(trip) {
 export async function updateTrip(tripCode, changes) {
   return apiRequest(`/trips/${encodeURIComponent(tripCode)}`, jsonRequest('PATCH', changes));
 }
+
+export async function generateTripSequence(tripCode) {
+  return apiRequest(`/trips/${encodeURIComponent(tripCode)}/sequence/generate`, jsonRequest('POST', {}));
+}
+
+export async function allocateTripVehicle(tripCode, vehicles, requiredType = '') {
+  return apiRequest(`/trips/${encodeURIComponent(tripCode)}/allocate`, jsonRequest('POST', { vehicles, requiredType }));
+}

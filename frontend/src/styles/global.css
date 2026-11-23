@@ -2026,6 +2026,9 @@ a:hover {
 .trip-sequence-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: 10px; border-bottom: 1px solid #edf0f3; }
 .trip-sequence-heading h2 { margin: 0 0 3px; font: 700 13px Georgia,'Times New Roman',serif; }
 .trip-sequence-heading p { margin: 0; color: #8290a4; font: 9px/1.4 Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+.trip-sequence-actions,.trip-engine-actions { display: inline-flex; align-items: center; justify-content: flex-end; gap: 7px; }
+.trip-engine-button { min-height: 29px; padding: 6px 9px; font: 9px Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; white-space: nowrap; }
+.trip-sequence-actions .trip-add-stop-button { min-height: 29px; }
 .trip-add-stop-button { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 5px; padding: 7px 9px; border: 1px solid #dce5e7; border-radius: 5px; color: #526476; background: #fff; font: 9px Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
 .trip-add-stop-button span { font-size: 14px; line-height: 10px; }
 .trip-add-stop-button:hover:not(:disabled) { border-color: #83bdb4; color: #00796f; background: #f5fbf9; }
@@ -2066,7 +2069,7 @@ a:hover {
 .trip-sequence-footer { display: flex; justify-content: space-between; gap: 10px; padding-top: 9px; border-top: 1px solid #edf0f3; color: #778791; font: 8px/1.4 Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
 .trip-lock { color: #008478; font-size: 7px; }
 @media(max-width:1000px) { .trip-summary-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } }
-@media(max-width:700px) { .trip-page-tabs { overflow-x: auto; } .trip-page-tabs small { display: none; } .trip-planner-heading h1 { font-size: 24px; } .trip-sequence-heading { align-items: flex-start; } .trip-sequence-heading p { max-width: 230px; } .trip-sequence-panel { padding: 10px; } .trip-stop { grid-template-columns: 25px minmax(0,1fr) 53px 68px; gap: 5px; padding: 7px 6px; } .trip-stop-actions { grid-column: 2; justify-content: flex-end; } .trip-stop-actions button { width: 26px; } .trip-drag-handle { grid-column: 4; grid-row: 2; } .trip-stop-fixed { grid-column: 4; } .trip-stop-meta { grid-column: 3; grid-row: 1 / span 2; } .trip-stop-title { flex-wrap: wrap; gap: 3px; } .trip-stop-title strong { flex-basis: 100%; } .trip-stop-main p { white-space: normal; } .trip-sequence-footer { flex-direction: column; } }
+@media(max-width:700px) { .trip-page-tabs { overflow-x: auto; } .trip-page-tabs small { display: none; } .trip-planner-heading h1 { font-size: 24px; } .trip-sequence-heading { align-items: flex-start; flex-direction: column; } .trip-sequence-heading p { max-width: 230px; } .trip-sequence-actions { width: 100%; justify-content: flex-start; flex-wrap: wrap; } .trip-sequence-panel { padding: 10px; } .trip-stop { grid-template-columns: 25px minmax(0,1fr) 53px 68px; gap: 5px; padding: 7px 6px; } .trip-stop-actions { grid-column: 2; justify-content: flex-end; } .trip-stop-actions button { width: 26px; } .trip-drag-handle { grid-column: 4; grid-row: 2; } .trip-stop-fixed { grid-column: 4; } .trip-stop-meta { grid-column: 3; grid-row: 1 / span 2; } .trip-stop-title { flex-wrap: wrap; gap: 3px; } .trip-stop-title strong { flex-basis: 100%; } .trip-stop-main p { white-space: normal; } .trip-sequence-footer { flex-direction: column; } }
 .trip-allocation-panel { margin-bottom: 13px; padding: 13px 14px; border: 1px solid #e1e7ec; border-radius: 9px; background: #fff; box-shadow: 0 1px 2px #1d263008; }
 .trip-allocation-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 11px; }
 .trip-allocation-heading h2 { margin: 0 0 3px; font: 700 13px Georgia,'Times New Roman',serif; }
