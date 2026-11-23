@@ -55,8 +55,8 @@ function mapTrip(row, stopRows = []) {
 
 async function loadStops(connection, tripCode) {
   const [rows] = await connection.execute(
-    `SELECT stop_id, booking_id, name, city, contact, load_kg AS load, cartons, notes, eta,
-      distance_km AS distance, tag, sequence_no AS sequence
+    `SELECT stop_id, booking_id, name, city, contact, load_kg AS \`load\`, cartons, notes, eta,
+      distance_km AS distance, tag, sequence_no AS \`sequence\`
      FROM trip_stops WHERE trip_code = ? ORDER BY sequence_no`,
     [tripCode],
   );
@@ -95,8 +95,8 @@ export async function listTrips() {
   const codes = rows.map(row => row.trip_code);
   const placeholders = codes.map(() => '?').join(', ');
   const [stopRows] = await pool.execute(
-    `SELECT trip_code, stop_id, booking_id, name, city, contact, load_kg AS load, cartons, notes, eta,
-      distance_km AS distance, tag, sequence_no AS sequence
+    `SELECT trip_code, stop_id, booking_id, name, city, contact, load_kg AS \`load\`, cartons, notes, eta,
+      distance_km AS distance, tag, sequence_no AS \`sequence\`
      FROM trip_stops WHERE trip_code IN (${placeholders}) ORDER BY trip_code, sequence_no`,
     codes,
   );
