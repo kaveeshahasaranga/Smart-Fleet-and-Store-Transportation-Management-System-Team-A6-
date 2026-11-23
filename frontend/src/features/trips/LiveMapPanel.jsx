@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useFleet } from '../../context/FleetContext.jsx';
-import { listVehicleLocations } from '../../services/tracking.js';
+import { listVehicleLocations, subscribeVehicleLocationStream } from '../../services/tracking.js';
 
 const previewCoordinates = [
   { lat: 6.9271, lng: 79.8612 },
@@ -43,6 +43,7 @@ export default function LiveMapPanel() {
   const markersRef = useRef(new Map());
   const [mapState, setMapState] = useState('loading');
   const [trackingState, setTrackingState] = useState('loading');
+  const [socketConnected, setSocketConnected] = useState(false);
   const [gpsLocations, setGpsLocations] = useState([]);
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
@@ -65,6 +66,19 @@ export default function LiveMapPanel() {
     refreshLocations();
     return () => { mounted = false; window.clearTimeout(timer); };
   }, []);
+
+  useEffect(() => subscribeVehicleLocationStream({
+    onConnection: setSocketConnected,
+    onLocation: location => {
+      setGpsLocations(current => {
+        const existing = current.find(item => item.vehicleId === location.vehicleId);
+        if (existing && new Date(existing.recordedAt) > new Date(location.recordedAt)) return current;
+        return existing
+          ? current.map(item => item.vehicleId === location.vehicleId ? location : item)
+          : [...current, location];
+      });
+    },
+  }), []);
 
   const trackedVehicles = useMemo(() => {
     const gpsByVehicle = new Map(gpsLocations.map(location => [location.vehicleId, location]));
@@ -160,7 +174,8 @@ export default function LiveMapPanel() {
     }
   }, [mapState, trackedVehicles]);
 
-  const trackingLabel = hasLivePositions ? 'LIVE GPS · 10s refresh'
+  const trackingLabel = socketConnected ? 'LIVE GPS · SOCKET'
+    : hasLivePositions ? 'GPS · 10s refresh'
     : trackingState === 'offline' ? 'GPS API unavailable'
       : trackingState === 'loading' ? 'Checking GPS feed' : 'Waiting for GPS';
 

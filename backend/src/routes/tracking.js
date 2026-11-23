@@ -56,6 +56,13 @@ router.post('/locations', asyncRoute(async (req, res) => {
     heading,
     recordedAt,
   });
+  if (!result.stale) {
+    const io = req.app.get('io');
+    io?.to('tracking:live').emit('tracking:location', { location: result.location });
+    if (result.location.tripCode) {
+      io?.to(`tracking:trip:${result.location.tripCode}`).emit('tracking:location', { location: result.location });
+    }
+  }
   res.status(202).json(result);
 }));
 
