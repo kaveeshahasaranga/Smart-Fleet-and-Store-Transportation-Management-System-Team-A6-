@@ -1,6 +1,6 @@
 # Smart Fleet and Store Transportation Management System
 
-Team A6 MERN project foundation. This project provides the MERN folder structure, three working frontend preview pages, and an Express API foundation. Frontend records are stored locally in the browser. Backend business APIs, authentication, authorization, database schemas, and real-time tracking are not implemented yet.
+Team A6 MERN project foundation. This project provides the MERN folder structure, three working frontend preview pages, and an Express API foundation. Vehicles and catalog items are stored in MongoDB through authenticated Express APIs. Booking drafts remain in browser storage. See backend/README.md for setup, endpoints, authentication integration and payload validation.
 
 ## Requirements and setup
 
@@ -61,7 +61,7 @@ backend/
   tests/                  Future API and integration tests
 ```
 
-Empty folders contain `.gitkeep` so Git retains them. Add files as work begins; placeholder folders do not expose APIs or enforce security.
+Empty folders contain `.gitkeep` so Git retains them. Vehicle and item modules now expose APIs, database models and server-side validation. Other placeholder modules remain available for the assigned team members.
 
 ## Team conventions
 
@@ -105,3 +105,9 @@ Store pages use `MainLayout` and admin pages use `AdminLayout` under the `/admin
 The vehicle screen now uses the reference table layout with registration, vehicle name, type, payload capacity, status badges, Edit, and a per-row delete menu. Status and type filters combine with search; filtered records can be exported as CSV. Pagination displays eight records per page. The admin header search opens the vehicle directory with a search query. Help and notifications describe the local preview. Existing locally saved vehicles are preserved; older records without names display a fallback name, and On trip is displayed as In transit. Fresh browsers receive the four reference sample vehicles.
 
 The production build passed after this update and the local development server returned HTTP 200. Browser visual and interaction checks for this revision could not be completed because the in-app browser could not connect to the local preview. Backend integration and authentication remain pending.
+
+## Backend implementation update
+
+Vehicle and item CRUD now persist through MongoDB. Frontend master-data screens use individual asynchronous API operations and display server errors. Booking item rows are checked through the catalog validation API before a local draft is saved. Payload validation and role-based API access are implemented. Local development mode is enabled in this workstation's untracked backend environment. Production login-token issuance and booking/trip workflow integration remain with their module owners.
+
+Setup, token contract, endpoint bodies and verification commands are documented in [backend/README.md](backend/README.md). This update is on the Hasaranga feature branch. Earlier frontend-only notes above describe the previous milestone.
