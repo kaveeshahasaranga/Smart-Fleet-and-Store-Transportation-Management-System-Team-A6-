@@ -2,7 +2,8 @@ import * as storeService from './store.service.js';
 
 export const getStores = async (req, res, next) => {
   try {
-    const stores = await storeService.getAllStores(req.query);
+    const filters = { ...req.query, ...(req.user.role === 'store' ? { storeId: req.user.storeId } : {}) };
+    const stores = await storeService.getAllStores(filters);
     res.status(200).json({ success: true, count: stores.length, data: stores });
   } catch (error) {
     next(error);
@@ -11,7 +12,7 @@ export const getStores = async (req, res, next) => {
 
 export const getStore = async (req, res, next) => {
   try {
-    const store = await storeService.getStoreById(req.params.storeId);
+    const store = await storeService.getStoreById(req.scopedStoreId || req.params.storeId);
     if (!store) {
       return res.status(404).json({ success: false, message: 'Store not found' });
     }

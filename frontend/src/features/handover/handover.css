@@ -95,6 +95,33 @@
   gap: 12px;
 }
 
+.handover-quantity {
+  display: grid;
+  justify-items: center;
+  color: #667174;
+  font-size: 7px;
+}
+
+.handover-quantity input {
+  width: 58px;
+  min-height: 27px;
+  padding: 3px;
+  margin: 3px 0 0;
+  text-align: center;
+  font-size: 8px;
+}
+
+.summary-action {
+  width: 100%;
+}
+
+.summary-back-link {
+  display: inline-block;
+  margin-top: 8px;
+  color: #087c75;
+  font-size: 8px;
+}
+
 .handover-main-column {
   display: grid;
   min-width: 0;

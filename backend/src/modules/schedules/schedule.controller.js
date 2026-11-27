@@ -2,7 +2,7 @@ import * as scheduleService from './schedule.service.js';
 
 export const getSchedules = async (req, res, next) => {
   try {
-    const storeId = req.query.storeId || 'STR-305';
+    const storeId = req.user.role === 'store' ? req.scopedStoreId : req.query.storeId || 'STR-305';
     const schedules = await scheduleService.getSchedulesByStore(storeId);
     res.status(200).json({ success: true, count: schedules.length, data: schedules });
   } catch (error) {

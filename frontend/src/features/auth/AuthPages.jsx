@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import AuthLayout, { Icon } from './AuthLayout.jsx';
+import { apiRequest, setApiAccessToken } from '../../services/api.js';
 
 const storeFeatures = [
   { icon: 'booking', title: 'Store booking requests', description: 'Request goods transport between stores and hubs.' },
@@ -40,6 +41,7 @@ function PasswordField({ id, label, value, onChange, autoComplete, trailing, val
           autoComplete={autoComplete}
           id={id}
           name={id}
+          maxLength={validateStrength ? 128 : undefined}
           onChange={onChange}
           minLength={validateStrength ? 8 : undefined}
           pattern={validateStrength ? '(?=.*[A-Z])(?=.*[0-9]).{8,}' : undefined}
@@ -72,21 +74,43 @@ function FormCard({ icon, title, description, children, className = '' }) {
   );
 }
 
-function FrontendOnlyForm({ children, className = '', onSubmit }) {
-  const [notice, setNotice] = useState('');
-  const handleSubmit = (event) => {
+function AuthForm({ children, className = '', onSubmit }) {
+  const [response, setResponse] = useState(null);
+  const [error, setError] = useState('');
+  const [pending, setPending] = useState(false);
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    setNotice(onSubmit);
+    if (pending) return;
+    setPending(true);
+    setError('');
+    setResponse(null);
+    try {
+      const values = Object.fromEntries(new FormData(event.currentTarget).entries());
+      setResponse(await onSubmit(values));
+    } catch (requestError) {
+      setError(requestError.message);
+    } finally {
+      setPending(false);
+    }
   };
   return (
-    <form className={className} onSubmit={handleSubmit}>
+    <form aria-busy={pending} className={className} onSubmit={handleSubmit}>
       {children}
-      {notice && <p className="form-notice" role="status">{notice}</p>}
+      {error && <p className="field-error" role="alert">{error}</p>}
+      {response?.message && <p className="form-notice" role="status">{response.message}</p>}
+      {response?.resetUrl && <p className="form-notice"><a href={response.resetUrl}>Open reset link</a></p>}
     </form>
   );
 }
 
 export function SignInPage() {
+  const navigate = useNavigate();
+  const submit = async ({ email, password }) => {
+    const result = await apiRequest('/auth/signin', { method: 'POST', body: JSON.stringify({ email, password }) });
+    setApiAccessToken(result.data.token, result.data.user);
+    navigate('/', { replace: true });
+    return result;
+  };
   return (
     <AuthLayout
       description="Sign in to manage bookings, track deliveries and confirm goods at your store."
@@ -96,7 +120,7 @@ export function SignInPage() {
       title="Move store goods with fewer calls and less paperwork."
     >
       <FormCard title="Sign in" description="Enter your work email and password to continue.">
-        <FrontendOnlyForm className="auth-form" onSubmit="Sign-in form submitted. Connect it to your authentication service to enable account access.">
+        <AuthForm className="auth-form" onSubmit={submit}>
           <AuthField autoComplete="email" id="email" label="Work email" type="email">
             <Icon name="email" className="input-icon" />
           </AuthField>
@@ -106,13 +130,9 @@ export function SignInPage() {
             label="Password"
             trailing={<Link to="/forgot-password">Forgot password?</Link>}
           />
-          <label className="check-row">
-            <input type="checkbox" name="remember" defaultChecked />
-            <span>Keep me signed in on this device</span>
-          </label>
           <button className="primary-button" type="submit">Sign in <span aria-hidden="true">→</span></button>
           <div className="info-callout"><span aria-hidden="true">ⓘ</span> You go straight to the Store Portal or Admin Dashboard, based on your account role.</div>
-        </FrontendOnlyForm>
+        </AuthForm>
         <p className="switch-auth">New to FleetFlow? <Link to="/signup">Create an account</Link></p>
       </FormCard>
     </AuthLayout>
@@ -120,8 +140,26 @@ export function SignInPage() {
 }
 
 export function SignUpPage() {
+  const navigate = useNavigate();
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const submit = async (values) => {
+    if (values['confirm-password'] !== values['signup-password']) throw new Error('Passwords do not match.');
+    const result = await apiRequest('/auth/signup', {
+      method: 'POST',
+      body: JSON.stringify({
+        name: values['full-name'],
+        email: values['signup-email'],
+        phone: values.phone,
+        storeLocation: values.store,
+        storeRole: values.role,
+        password: values['signup-password'],
+      }),
+    });
+    setApiAccessToken(result.data.token, result.data.user);
+    navigate('/', { replace: true });
+    return result;
+  };
   return (
     <AuthLayout
       description="Create an account to request transport and confirm deliveries for your store."
@@ -130,7 +168,7 @@ export function SignUpPage() {
       title="Set up your store account."
     >
       <FormCard className="signup-card" title="Create account" description="Tell us who you are and which store you work at.">
-        <FrontendOnlyForm className="auth-form signup-form" onSubmit="Registration form submitted. Connect it to your account service to create an account.">
+        <AuthForm className="auth-form signup-form" onSubmit={submit}>
           <div className="field-grid">
             <AuthField autoComplete="name" id="full-name" label="Full name" />
             <AuthField autoComplete="email" id="signup-email" label="Work email" type="email" />
@@ -176,7 +214,7 @@ export function SignUpPage() {
             Create account <span aria-hidden="true">→</span>
           </button>
           {confirmPassword && password !== confirmPassword && <p className="field-error" role="alert">Passwords do not match.</p>}
-        </FrontendOnlyForm>
+        </AuthForm>
         <p className="switch-auth">Already have an account? <Link to="/signin">Sign in</Link></p>
       </FormCard>
     </AuthLayout>
@@ -184,6 +222,10 @@ export function SignUpPage() {
 }
 
 export function ForgotPasswordPage() {
+  const submit = async ({ 'recovery-email': email }) => apiRequest('/auth/forgot-password', {
+    method: 'POST',
+    body: JSON.stringify({ email }),
+  });
   return (
     <AuthLayout
       description="We will email you a one-time link so you can get back into your account."
@@ -193,13 +235,13 @@ export function ForgotPasswordPage() {
       title="Reset your password securely."
     >
       <FormCard icon="key" title="Forgot password?" description="Enter the work email on your account and we will send you a reset link.">
-        <FrontendOnlyForm className="auth-form" onSubmit="Request captured in this frontend demo. Connect this form to your service to send a reset link.">
+        <AuthForm className="auth-form" onSubmit={submit}>
           <AuthField autoComplete="email" id="recovery-email" label="Work email" type="email">
             <Icon name="email" className="input-icon" />
           </AuthField>
           <button className="primary-button" type="submit">Send reset link <span aria-hidden="true">↗</span></button>
           <div className="info-callout"><span aria-hidden="true">ⓘ</span> Can't find the email? Check your spam folder, or try again in 60 seconds.</div>
-        </FrontendOnlyForm>
+        </AuthForm>
         <p className="back-link"><Link to="/signin"><span aria-hidden="true">←</span> Back to sign in</Link></p>
       </FormCard>
     </AuthLayout>
@@ -209,8 +251,20 @@ export function ForgotPasswordPage() {
 export function ResetPasswordPage() {
   const location = useLocation();
   const emailFromLink = new URLSearchParams(location.search).get('email') || '';
+  const tokenFromLink = new URLSearchParams(location.search).get('token') || '';
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const submit = async (values) => {
+    if (values['new-password'] !== values['confirm-new-password']) throw new Error('Passwords do not match.');
+    return apiRequest('/auth/reset-password', {
+      method: 'POST',
+      body: JSON.stringify({
+        email: values['account-email'],
+        token: tokenFromLink,
+        password: values['new-password'],
+      }),
+    });
+  };
   return (
     <AuthLayout
       description="Your old password stops working as soon as you save the new one."
@@ -219,7 +273,7 @@ export function ResetPasswordPage() {
       title="Choose a new password."
     >
       <FormCard icon="lock" title="Reset password" description="Create a new password for your account.">
-        <FrontendOnlyForm className="auth-form" onSubmit="Password form submitted. Connect it to your password reset service to save your new password.">
+        <AuthForm className="auth-form" onSubmit={submit}>
           <AuthField autoComplete="email" id="account-email" label="Account" type="email" defaultValue={emailFromLink} />
           <PasswordField autoComplete="new-password" id="new-password" label="New password" onChange={(event) => setPassword(event.target.value)} validateStrength value={password} />
           <p className="password-hint"><span aria-hidden="true">ⓘ</span> At least 8 characters, with an uppercase letter and a number.</p>
@@ -229,7 +283,7 @@ export function ResetPasswordPage() {
           <button className="primary-button" type="submit" disabled={!password || password !== confirmPassword}>
             Save new password <span aria-hidden="true">→</span>
           </button>
-        </FrontendOnlyForm>
+        </AuthForm>
         <p className="back-link"><Link to="/signin"><span aria-hidden="true">←</span> Back to sign in</Link></p>
       </FormCard>
     </AuthLayout>

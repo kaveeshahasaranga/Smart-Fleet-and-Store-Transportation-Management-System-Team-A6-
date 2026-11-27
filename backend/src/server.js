@@ -3,11 +3,13 @@ import { env } from './config/env.js';
 import { connectDatabase } from './config/database.js';
 import Vehicle from './modules/vehicles/vehicle.model.js';
 import Item from './modules/items/item.model.js';
+import User from './modules/auth/user.model.js';
+import Booking from './modules/bookings/booking.model.js';
 
 try {
   if (env.mongoUri) {
     await connectDatabase(env.mongoUri);
-    await Promise.all([Vehicle.init(), Item.init()]);
+    await Promise.all([Vehicle.init(), Item.init(), User.init(), Booking.init()]);
   } else {
     console.warn('Running without MongoDB. Store/schedule preview storage remains available.');
   }
