@@ -36,7 +36,7 @@ export default function App() {
             <Route path="bookings/create" element={<BookingPage />} />
             <Route path="*" element={<p>Page not found.</p>} />
           </Route>
-          <Route path="admin" element={<AdminLayout />}>
+          <Route path="admin" element={<div className="fleet-portal"><AdminLayout /></div>}>
             <Route index element={<Navigate to="vehicles" replace />} />
             <Route path="vehicles" element={<VehiclesPage />} />
             <Route path="items" element={<ItemsPage />} />
