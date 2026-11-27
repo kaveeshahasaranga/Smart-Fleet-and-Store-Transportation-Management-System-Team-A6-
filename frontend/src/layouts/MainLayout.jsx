@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
+import Icon from '../components/common/Icon.jsx';
 
 // Store portal shell. The authentication feature can wrap this route group later.
 export default function MainLayout() {
@@ -8,7 +9,7 @@ export default function MainLayout() {
 
   return <div className="store-portal">
     <header className="header">
-      <NavLink to="/bookings/create" className="brand"><span className="brand-icon">▰</span>FleetFlow</NavLink>
+      <NavLink to="/bookings/create" className="brand"><span className="brand-icon"><Icon name="truck" size={28} /></span>FleetFlow</NavLink>
       <nav aria-label="Store portal navigation"><NavLink to="/bookings/create">Booking</NavLink></nav>
       <span className="portal-label">STORE PORTAL</span>
     </header>
@@ -25,7 +26,7 @@ export default function MainLayout() {
       <main className="content"><div className="demo-notice">Frontend preview · Booking drafts are saved in this browser and are not sent to the server.</div><Outlet /></main>
     </div>
     <footer className="footer">
-      <div><div className="brand">▰ FleetFlow</div><p>Simplifying fleet operations, store scheduling<br/>and delivery coordination.</p></div>
+      <div><div className="brand"><span className="brand-icon"><Icon name="truck" size={28} /></span>FleetFlow</div><p>Simplifying fleet operations, store scheduling<br/>and delivery coordination.</p></div>
       <div><strong>STORE WORKSPACE</strong><NavLink to="/bookings/create">Create a booking</NavLink><p>Store booking & delivery coordination</p></div>
       <div className="footer-bottom">© {new Date().getFullYear()} FleetFlow. Team A6.<span>Smart Fleet & Store Transportation</span></div>
     </footer>
