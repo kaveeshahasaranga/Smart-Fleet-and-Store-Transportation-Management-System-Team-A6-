@@ -13,6 +13,7 @@ const isDbConnected = () => mongoose.connection.readyState === 1;
 export const getAllStores = async (filters = {}) => {
   if (isDbConnected()) {
     const query = {};
+    if (filters.storeId) query.storeId = filters.storeId;
     if (filters.status && filters.status !== 'All statuses') {
       query.status = filters.status;
     }
@@ -30,6 +31,7 @@ export const getAllStores = async (filters = {}) => {
   }
 
   let result = readStores();
+  if (filters.storeId) result = result.filter((store) => store.storeId === filters.storeId);
   if (filters.status && filters.status !== 'All statuses') {
     result = result.filter((s) => s.status === filters.status);
   }

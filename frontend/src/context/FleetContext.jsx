@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useRef, useState } from 'react';
-import { apiRequest } from '../services/api.js';
+import { apiRequest, getApiAccessToken } from '../services/api.js';
 const FleetContext = createContext(null);
 
 function readDrafts() {
@@ -32,11 +32,23 @@ export function FleetProvider({ children }) {
   }
 
   useEffect(() => {
-    refreshData();
-    window.addEventListener('fleet-auth-changed', refreshData);
+    function handleAuthChange() {
+      if (getApiAccessToken()) {
+        refreshData();
+        return;
+      }
+      generation.current++;
+      setItems([]);
+      setVehicles([]);
+      setLoading(false);
+      setDataError('');
+    }
+
+    handleAuthChange();
+    window.addEventListener('fleet-auth-changed', handleAuthChange);
     return () => {
       generation.current++;
-      window.removeEventListener('fleet-auth-changed', refreshData);
+      window.removeEventListener('fleet-auth-changed', handleAuthChange);
     };
   }, []);
 
